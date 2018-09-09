@@ -9,27 +9,26 @@
 #import <UIKit/UIKit.h>
 
 typedef enum : NSUInteger {
-    EHINotificationViewAnimationTypePush,       // 新视图把旧视图推出去
-    EHINotificationViewAnimationTypeMoveIn,     // 新视图移到旧视图上面
-    EHINotificationViewAnimationTypeReveal,     // 将旧视图移开,显示下面的新视图
-    EHINotificationViewAnimationTypeCube,       // 立方体翻滚效果
-    EHINotificationViewAnimationTypeOglFlip,    // 上下左右翻转效果
-    EHINotificationViewAnimationTypePageCurl,   // 向上翻页效果
-    EHINotificationViewAnimationTypePageUnCurl  // 向下翻页效果
-} EHINotificationViewAnimationType;     // 动画类型
+    EHINotificationViewAnimationTypePush,       /// 新视图把旧视图推出去
+    EHINotificationViewAnimationTypeMoveIn,     /// 新视图移到旧视图上面
+    EHINotificationViewAnimationTypeReveal,     /// 将旧视图移开,显示下面的新视图
+    EHINotificationViewAnimationTypeCube,       /// 立方体翻滚效果
+    EHINotificationViewAnimationTypeOglFlip,    /// 上下左右翻转效果
+    EHINotificationViewAnimationTypePageCurl,   /// 向上翻页效果
+    EHINotificationViewAnimationTypePageUnCurl  /// 向下翻页效果
+} EHINotificationViewAnimationType;     /// 动画类型
 
 typedef enum : NSUInteger {
-    EHINotificationViewTransitionDirectionFromTop,      // 从上方
-    EHINotificationViewTransitionDirectionFromLeft,     // 从左方
-    EHINotificationViewTransitionDirectionFromBottom,   // 从下方
-    EHINotificationViewTransitionDirectionFromRight     // 从右方
-} EHINotificationViewTransitionDirection;      // 过渡方向
+    EHINotificationViewTransitionDirectionFromTop,      /// 从上方
+    EHINotificationViewTransitionDirectionFromBottom,   /// 从下方
+} EHINotificationViewTransitionDirection;      /// 过渡方向
 
+/** <#note> */
 
 @interface EHINotificationView : UIView
 
-/// 图片列表
-@property (nonatomic ,strong) NSArray<UIImage *> *imageList;
+/// 图标
+@property (strong, nonatomic) UIImage *icon;
 /// 通知文字列表
 @property (nonatomic ,strong) NSArray<NSString *> *noticeList;
 /// 动画类型
@@ -48,5 +47,10 @@ typedef enum : NSUInteger {
 @property (nonatomic, strong) void(^animationDidStart)(void);
 /// 每一次过渡动画结束的回调
 @property (nonatomic, strong) void(^animationDidStop)(void);
+
+/// 开始动画
+- (void)startAnimation;
+/// 结束动画
+- (void)stopAnimation;
 
 @end

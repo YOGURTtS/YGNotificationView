@@ -22,96 +22,42 @@ static CGFloat defaultAnimationDuration = .5f;
 static CGFloat defaultAnimationInterval = 2.f;
 static CGFloat defaultFontSize = 10.f;
 
-@implementation EHINotificationView
+@implementation EHINotificationView {
+    BOOL _hasImage;
+}
 
+#pragma mark - initialization
 
 - (instancetype)initWithFrame:(CGRect)frame {
     
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor whiteColor];
-        [self initContentView];
+        [self commonInit];
     }
     return self;
 }
 
-- (void)startAnimation {
-    
-    NSAssert(self.imageList.count <= 1 && self.noticeList.count > 1 ||
-             self.imageList.count > 1 && self.noticeList.count == self.imageList.count ||
-             self.imageList.count <= 1 && self.noticeList.count == 1, @"图片和文字数量不一致");
-    
-    if (self.noticeList.count > 1) {
-        self.timer = [NSTimer timerWithTimeInterval:self.animationInterval ?: defaultAnimationInterval target:self selector:@selector(displayNews) userInfo:nil repeats:YES];
-        [[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];
-    } else {
-        [self.timer invalidate];
+- (void)commonInit {
+    if (_hasImage) {
+        [self addSubview:self.image];
     }
-}
-
-- (void)stopAnimation {
-    if (self.timer) {
-        [self.timer invalidate];
-        self.timer = nil;
-    }
-}
-
-- (void)initContentView {
-    self.image = [UIImageView new];
-    self.image.contentMode = UIViewContentModeScaleAspectFill;
-    [self addSubview:self.image];
-    
-    self.notice = [UILabel new];
-    self.notice.font = self.textFont ?: [UIFont systemFontOfSize:defaultFontSize];
-    self.notice.text = @"查看优惠活动";
-    self.notice.textColor = self.textColor ?: defaultColor;
     [self addSubview:self.notice];
 }
 
+#pragma mark - methods
+
 - (void)layoutSubviews {
-//    [self.notice mas_makeConstraints:^(MASConstraintMaker *make) {
-//        make.right.mas_equalTo(self.mas_right).with.offset(-10);
-//        make.centerY.equalTo(self);
-//        make.left.equalTo(self);
-//    }];
-    if (self.imageList.count) {
-        self.image.frame = CGRectMake(16, (self.bounds.size.height - self.image.image.size.height) / 2, self.image.image.size.width, self.image.image.size.height);
-    }
+    self.image.frame = CGRectMake(16, (self.bounds.size.height - self.image.image.size.height) / 2, self.image.image.size.width, self.image.image.size.height);
     CGFloat noticeHeight = [self.notice sizeThatFits:CGSizeMake(200, self.textFont ? self.textFont.pointSize : 10.f)].height;
-    if (self.noticeList.count && self.imageList.count) {
+    if (self.noticeList.count && _hasImage) {
         self.notice.frame = CGRectMake(CGRectGetMaxX(self.image.frame) + 5, (self.bounds.size.height - noticeHeight) / 2, self.bounds.size.width - CGRectGetMaxX(self.image.frame) - 45, noticeHeight);
-    } else if (self.noticeList.count && self.imageList.count == 0) {
-        self.notice.frame = CGRectMake(12, (self.bounds.size.height - noticeHeight) / 2, self.bounds.size.width - 52, noticeHeight);
     } else {
-        
+        self.notice.frame = CGRectMake(12, (self.bounds.size.height - noticeHeight) / 2, self.bounds.size.width - 52, noticeHeight);
     }
 }
 
-- (void)displayNews {
-    if (!self.noticeList.count || self.noticeList.count == 0) {
-        return;
-    }
-    countInt++;
-    
-    if (countInt >= [self.noticeList count])
-        countInt = 0;
-    CATransition *animation = [CATransition animation];
-    animation.delegate = self;
-    animation.duration = self.animationDuration ?: defaultAnimationDuration;
-    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-    animation.fillMode = kCAFillModeForwards;
-    animation.removedOnCompletion = YES;
-    animation.type = [self getAnimationType];
-    animation.subtype = [self getTransitionDirection];
-    
-    [self.notice.layer addAnimation:animation forKey:@"noticeAnimation"];
-    self.notice.text = self.noticeList[countInt];
-    
-    if (self.imageList.count > 1) {
-        [self.image.layer addAnimation:animation forKey:@"imageAnimation"];
-        self.image.image = self.imageList[countInt];
-    }
-}
+#pragma mark - about animation
 
 - (NSString *)getAnimationType {
     switch (self.animationType) {
@@ -138,14 +84,55 @@ static CGFloat defaultFontSize = 10.f;
     switch (self.transitionDirection) {
         case EHINotificationViewTransitionDirectionFromTop:
             return @"fromTop";
-        case EHINotificationViewTransitionDirectionFromLeft:
-            return @"fromLeft";
+//        case EHINotificationViewTransitionDirectionFromLeft:
+//            return @"fromLeft";
         case EHINotificationViewTransitionDirectionFromBottom:
             return @"fromBottom";
-        case EHINotificationViewTransitionDirectionFromRight:
-            return @"fromRight";
+//        case EHINotificationViewTransitionDirectionFromRight:
+//            return @"fromRight";
         default:
             return @"fromBottom";
+    }
+}
+
+- (void)startAnimation {
+    if (self.timer) {
+        [self.timer invalidate];
+        self.timer = nil;
+    }
+    if (self.noticeList.count > 1) {
+        self.timer = [NSTimer timerWithTimeInterval:self.animationInterval ?: defaultAnimationInterval target:self selector:@selector(displayNews) userInfo:nil repeats:YES];
+        [[NSRunLoop currentRunLoop] addTimer:self.timer forMode:NSRunLoopCommonModes];
+    } else {
+        [self.timer invalidate];
+    }
+}
+
+- (void)displayNews {
+    if (!self.noticeList.count || self.noticeList.count == 0) {
+        return;
+    }
+    countInt++;
+    
+    if (countInt >= [self.noticeList count])
+        countInt = 0;
+    CATransition *animation = [CATransition animation];
+    animation.delegate = self;
+    animation.duration = self.animationDuration ?: defaultAnimationDuration;
+    animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
+    animation.fillMode = kCAFillModeForwards;
+    animation.removedOnCompletion = YES;
+    animation.type = [self getAnimationType];
+    animation.subtype = [self getTransitionDirection];
+    
+    [self.notice.layer addAnimation:animation forKey:@"noticeAnimation"];
+    self.notice.text = self.noticeList[countInt];
+}
+
+- (void)stopAnimation {
+    if (self.timer) {
+        [self.timer invalidate];
+        self.timer = nil;
     }
 }
 
@@ -161,9 +148,17 @@ static CGFloat defaultFontSize = 10.f;
     }
 }
 
+#pragma mark - setter
+
+- (void)setIcon:(UIImage *)icon {
+    _icon = icon;
+    self.image.image = icon;
+    _hasImage = YES;
+    [self layoutSubviews];
+}
+
 - (void)setNoticeList:(NSArray *)noticeList {
     _noticeList = noticeList;
-    
     if (noticeList.count) {
         countInt = 0;
         self.notice.text = [self.noticeList firstObject];
@@ -173,6 +168,26 @@ static CGFloat defaultFontSize = 10.f;
 - (void)setTextColor:(UIColor *)textColor {
     _textColor = textColor;
     self.notice.textColor = textColor;
+}
+
+#pragma mark - properties
+
+- (UIImageView *)image {
+    if (!_image) {
+        _image = [UIImageView new];
+        _image.contentMode = UIViewContentModeScaleAspectFill;
+    }
+    return _image;
+}
+
+- (UILabel *)notice {
+    if (!_notice) {
+        _notice = [UILabel new];
+        _notice.font = [UIFont systemFontOfSize:defaultFontSize];
+        _notice.text = @"查看优惠活动";
+        _notice.textColor = defaultColor;
+    }
+    return _notice;
 }
 
 @end

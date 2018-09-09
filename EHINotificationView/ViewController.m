@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "EHINotificationView.h"
 
 @interface ViewController ()
 
@@ -17,6 +18,18 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    EHINotificationView *notificationView = [EHINotificationView new];
+    notificationView.frame = CGRectMake(0, 20, self.view.bounds.size.width, 20);
+    [self.view addSubview:notificationView];
+    notificationView.noticeList = @[@"哈哈哈哈哈哈", @"呵呵呵呵"];
+    notificationView.animationType = EHINotificationViewAnimationTypeCube;
+    [notificationView startAnimation];
+    notificationView.animationDidStart = ^{
+        NSLog(@"animationDidStart");
+    };
+    notificationView.animationDidStop = ^{
+        NSLog(@"animationDidStop");
+    };
 }
 
 
